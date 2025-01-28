@@ -1,4 +1,4 @@
-# jobseek_watch
+# jobstreet_watch
 what this script basically do is:
 1. scan your inbox
 2. filter every job application you ever sent
