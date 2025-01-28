@@ -59,13 +59,11 @@ function filterAndCategorizeEmails() {
 
   // Write to "Sheet 1"
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-  if (!spreadsheet) spreadsheet = SpreadsheetApp.create("Jobseek Watch");
-
+  if (!spreadsheet) spreadsheet = SpreadsheetApp.create("Jobstreet Watch");
+  spreadsheet.renameActiveSheet("watchlist");
   // Access the "Sheet 1"
-  var sheet = spreadsheet.getSheetByName("Sheet 1");
-  if (!sheet) {
-    sheet = spreadsheet.insertSheet("Sheet 1"); // Create "Sheet 1" if it doesn't exist
-  }
+  var sheet = spreadsheet.getSheetByName("watchlist");
+  
 
   // Updated header to match 4 columns: Date, Application Name, Company Name, Status
   if (sheet.getLastRow() === 0) {
