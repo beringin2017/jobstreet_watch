@@ -6,5 +6,6 @@ what this script basically do is:
 
 everything is run on the Google App Script platform
 
-![image](https://github.com/user-attachments/assets/befe275f-e078-4835-8d39-b03f8b186a2c)
+![image](https://github.com/user-attachments/assets/87a51ef2-7959-46da-8d36-84472ed662d1)
+
 
