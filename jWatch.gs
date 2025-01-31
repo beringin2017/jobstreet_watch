@@ -1,6 +1,6 @@
 function filterAndCategorizeEmails() {
   const CONFIG = {
-    SEARCH_QUERY: '("Lamaranmu untuk posisi" OR "Terima kasih atas minat Anda")',
+    SEARCH_QUERY: '("Lamaranmu untuk posisi" OR "Terima kasih atas minat Anda" OR "sekarang telah kedaluwarsa")',
     SHEET_NAME: "watchlist",
     HEADERS: ["Date", "Application Name", "Company Name", "Status"]
   };
@@ -20,6 +20,7 @@ function processThreads(threads) {
 function processMessage(message) {
   const body = message.getBody().replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
   const date = message.getDate();
+
   if (body.includes("Lamaranmu untuk posisi") && body.includes("berhasil dikirimkan ke")) {
     const match = parseMatch(body, 
       /Lamaranmu untuk posisi\s+(.*?)\s+berhasil/,
@@ -27,6 +28,7 @@ function processMessage(message) {
     );
     return match && [date, match[0], match[1].replace(/&amp;/g,'&'), "Sent"];
   }
+
   if (body.includes("Terima kasih atas minat Anda pada") && body.includes("Sayangnya")) {
     const match = parseMatch(body,
       /pada\s*(.*?)\s*lowongan/,
@@ -34,6 +36,15 @@ function processMessage(message) {
     );
     return match && [date, match[0], match[1].replace(/&amp;/g,'&'), "Rejected"];
   }
+
+  if (body.includes("sekarang telah kedaluwarsa")) {
+    const match = parseMatch(body,
+      /Pekerjaan\s+(.*?)\s+yang Anda lamar di/,
+      /di\s+([^.\n<]+?)\s+sekarang telah kedaluwarsa/
+    );
+    return match && [date, match[0], match[1].replace(/&amp;/g,'&'), "Rejected"];
+  }
+
   return null;
 }
 
