@@ -4,11 +4,27 @@ function filterAndCategorizeEmails() {
     SHEET_NAME: "watchlist",
     HEADERS: ["Date", "Application Name", "Company Name", "Status"]
   };
-  const threads = GmailApp.search(CONFIG.SEARCH_QUERY);
+
+  const threads = fetchAllThreads(CONFIG.SEARCH_QUERY);
   const categorizedEmails = processThreads(threads);
   const sheet = getOrCreateSheet(CONFIG.SHEET_NAME, CONFIG.HEADERS);
   writeToSheet(sheet, CONFIG.HEADERS, categorizedEmails);
   Logger.log("Processed %s emails. Data updated successfully!", categorizedEmails.length);
+}
+
+function fetchAllThreads(query) {
+  let threads = [];
+  let start = 0;
+  const batchSize = 500;
+
+  while (true) {
+    const batch = GmailApp.search(query, start, batchSize);
+    if (batch.length === 0) break;
+    threads = threads.concat(batch);
+    start += batchSize;
+  }
+
+  return threads;
 }
 
 function processThreads(threads) {
@@ -42,14 +58,20 @@ function processMessage(message) {
       /Pekerjaan\s+(.*?)\s+yang Anda lamar di/,
       /di\s+([^.\n<]+?)\s+sekarang telah kedaluwarsa/
     );
-    return match && [date, match[0], match[1].replace(/&amp;/g,'&'), "Rejected"];
+    if (match) {
+      const companyName = match[1].replace(/telah kedaluwarsa.*/, '').trim();
+      return [date, match[0], companyName, "Rejected"];
+    }
   }
 
   return null;
 }
 
 function parseMatch(body, ...regexes) {
-  const matches = regexes.map(r => body.match(r)?.[1]?.trim());
+  const matches = regexes.map(r => {
+    const match = body.match(r);
+    return match ? match[1].trim() : null;
+  });
   return matches.every(Boolean) ? matches : null;
 }
 
