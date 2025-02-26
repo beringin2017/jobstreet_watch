@@ -1,11 +1,26 @@
 # jobstreet_watch
-what this script basically do is:
-1. scan your inbox
-2. filter & classify every job application you ever sent: sent, rejected, expired (rejected)
-3. export everything into google spreadsheet
+This Google Apps Script automates the process of fetching and categorizing job application emails from Gmail and logs them into a Google Spreadsheet. It extracts key details such as application date, position, company name, and status (Sent, Rejected, or Expired).
 
-everything is run on the Google App Script platform
+## Features
+- Automatically fetches job application emails based on specific keywords.
+- Extracts relevant details using regex pattern matching.
+- Categorizes applications into Sent, Rejected, and Expired.
+- Updates an existing Google Spreadsheet without creating new sheets.
+- Renames the default active sheet to "watchlist" for consistency.
 
-![image](https://github.com/user-attachments/assets/87a51ef2-7959-46da-8d36-84472ed662d1)
+## Setup Instructions
+1. Open [Google Apps Script](https://script.google.com/) and create a new project.
+2. Copy and paste the provided script into the editor.
+3. Save and authorize the script to access Gmail and Google Sheets.
+4. Ensure that your Google Spreadsheet is open and active before running the script.
+5. Run `filterAndCategorizeEmails` to process and log application data.
+
+## Usage
+- The script runs on-demand via the "Job Applications" menu in Google Sheets.
+- It scans Gmail for job-related emails and logs structured data into the spreadsheet.
+- The script intelligently processes messages, removing unnecessary text and extracting useful details.
+
+
+![image](https://github.com/user-attachments/assets/0832f5a1-f1f6-4d80-9857-4aa883f03598)
 
 
