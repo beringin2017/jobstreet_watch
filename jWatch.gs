@@ -1,6 +1,6 @@
 function filterAndCategorizeEmails() {
   const CONFIG = {
-    SEARCH_QUERY: '("Lamaranmu untuk posisi" OR "Terima kasih atas minat Anda" OR "sekarang telah kedaluwarsa" OR "Maaf, lamaranmu untuk" OR subject:"Maaf, lamaranmu untuk")',
+    SEARCH_QUERY: '("Lamaranmu untuk posisi" OR "Terima kasih atas minat Anda" OR "sekarang telah kedaluwarsa" OR "Maaf, lamaranmu untuk" OR subject:"Maaf, lamaranmu untuk" OR subject:"Application submitted" OR subject:"Your application has been submitted" OR "The following items were sent to")',
     SHEET_NAME: "watchlist",
     HEADERS: ["Date", "Application Name", "Company Name", "Status"]
   };
@@ -41,13 +41,15 @@ const regexSentCompany = /berhasil dikirimkan ke\s+(.*?)\s*&#8202;/;
 const regexRejectedPosition = /pada\s*(.*?)\s*lowongan/;
 const regexRejectedCompany = /di\s+([^.\n<]+?)\s*\.\s*Sayangnya/;
 const regexSubjectPosition = /lamaranmu untuk\s+(.*?)\s+di/;
-const regexSubjectCompany = /di\s+(.*?)\s+belum sesuai/;
+const regexSubjectCompany = /di\s+(.*?)\s*belum sesuai/;
 
 function processMessage(message) {
   const rawBody = message.getBody();
   const body = rawBody.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
   const date = message.getDate();
   const subject = message.getSubject();
+  
+  // --- Jobstreet Rules ---
   if (body.includes("Lamaranmu untuk posisi") && body.includes("berhasil dikirimkan ke")) {
     const posMatch = body.match(regexSentPosition);
     const compMatch = body.match(regexSentCompany);
@@ -76,6 +78,29 @@ function processMessage(message) {
       return [date, posMatch[1].trim(), compMatch[1].trim(), "Rejected"];
     }
   }
+
+  // --- Indeed Rules ---
+  // Successful Application
+  if (body.includes("Application submitted") && body.includes("The following items were sent to")) {
+    // Extract company name from the reliable "The following items were sent to..." phrase
+    const compMatch = body.match(/The following items were sent to (.*?)\. Good luck!/);
+    if (compMatch) {
+      const companyName = compMatch[1].trim();
+      // Escape special regex characters (like parentheses) in the company name
+      const escapedCompany = companyName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      
+      // Extract position name: it sits between "Application submitted" and the company name
+      const posRegex = new RegExp('Application submitted\\s+(.*?)\\s+' + escapedCompany);
+      const posMatch = body.match(posRegex);
+      
+      if (posMatch) {
+        return [date, posMatch[1].trim(), companyName, "Sent"];
+      }
+    }
+  }
+  
+  // TODO: Indeed Rejected/Expired rules will be added here
+
   return null;
 }
 
